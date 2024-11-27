@@ -146,6 +146,11 @@ func (dms *DiskMetricStore) GetMetricFamilies() []*dto.MetricFamily {
 
 	for _, group := range dms.metricGroups {
 		for name, tmf := range group.Metrics {
+			now := time.Now()
+			fiveMinutesAgo := now.Add(-5 * time.Minute)
+			if tmf.Timestamp.Before(fiveMinutesAgo) {
+				continue
+			}
 			mf := tmf.GetMetricFamily()
 			if mf == nil {
 				level.Warn(dms.logger).Log("msg", "storage corruption detected, consider wiping the persistence file")
